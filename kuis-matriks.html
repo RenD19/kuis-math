@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Kuis Determinan dan Invers Matriks</title>
+<title>Kuis Matriks</title>
 <script>
   /* Isi URL /exec dari Apps Script. Kosong = mode pratinjau tanpa server. */
-  window.KUIS_CONFIG = { ENDPOINT: "https://script.google.com/macros/s/AKfycbwSRZgkOytWOTmxVOy-v7JnfURe5AL4uiBHgNz0p8thZauhhHtBfJQIRgJJCLA-C4h3fg/exec" };
+  window.KUIS_CONFIG = { ENDPOINT: "" };
 </script>
 <style>
 :root{
@@ -199,7 +199,7 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
 
 <!-- ============ MASUK ============ -->
 <main id="layarMasuk" class="masuk" hidden>
-  <h1 id="judulMasuk">Kuis Determinan dan Invers Matriks</h1>
+  <h1 id="judulMasuk">Kuis Matriks</h1>
   <p class="sub" id="subMasuk">Kerjakan tanpa kalkulator. Siapkan kertas coretan.</p>
   <form class="lembar" id="formMasuk" novalidate>
     <p class="galat" id="galatMasuk" role="alert" hidden></p>
@@ -228,7 +228,7 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
       <span class="bantu">Token dibacakan guru saat kuis dimulai.</span>
     </div>
     <button class="tombol utama penuh" id="btnMasuk" type="submit">Mulai mengerjakan</button>
-    <p class="catatan-kecil" id="infoDurasi">Waktu: 60 menit, 12 soal. Jawaban tersimpan otomatis. Bila koneksi terputus, masuk lagi dengan data yang sama.</p>
+    <p class="catatan-kecil" id="infoDurasi">Waktu: 60 menit, 18 soal. Jawaban tersimpan otomatis. Bila koneksi terputus, masuk lagi dengan data yang sama.</p>
   </form>
 </main>
 
@@ -236,7 +236,7 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
 <div id="layarKerja" hidden>
   <header class="kepala">
     <div class="kepala-dalam">
-      <div class="judul"><h1 id="judulKerja" style="font:inherit;margin:0">Kuis Determinan dan Invers Matriks</h1><span class="siapa" id="siapa"></span></div>
+      <div class="judul"><h1 id="judulKerja" style="font:inherit;margin:0">Kuis Matriks</h1><span class="siapa" id="siapa"></span></div>
       <button class="tombol buka-nav" id="btnBukaNav" type="button" aria-haspopup="dialog">Soal <span id="posHp">1/12</span></button>
       <div class="waktu" id="waktu" role="timer" aria-label="Sisa waktu"><small>sisa waktu</small><span id="waktuTeks">60:00</span></div>
     </div>
@@ -307,12 +307,12 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
   /* ===================== notasi ===================== */
   var MINUS = function (t) { return String(t).replace(/(^|[\s(=;,])-(?=[\dxyz(])/g, '$1−'); };
   function el(tag, cls, teks) { var e = document.createElement(tag); if (cls) e.className = cls; if (teks != null) e.textContent = teks; return e; }
-  function bacaSel(t) { t = MINUS(t); return t.replace(/−/g, 'minus ').replace(/\//g, ' per '); }
+  function bacaSel(t) { t = MINUS(t); return t.replace(/−/g, ' minus ').replace(/\+/g, ' plus ').replace(/\//g, ' per ').replace(/\s+/g, ' ').trim(); }
   function sel(t) {
     var m = /^(−?)(\d+)\/(\d+)$/.exec(MINUS(t));
     var s = el('span');
     if (m) { if (m[1]) s.appendChild(document.createTextNode('−')); s.appendChild(frac(m[2], m[3])); }
-    else s.textContent = MINUS(t);
+    else s.textContent = MINUS(t).replace(/([0-9a-zA-Z])([+−])(?=[0-9a-zA-Z])/g, '$1\u2009$2\u2009');
     return s;
   }
   function frac(a, b) { var f = el('span', 'frac'); f.setAttribute('aria-hidden', 'true'); f.appendChild(el('span', '', a)); f.appendChild(el('span', '', b)); return f; }
@@ -704,12 +704,13 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
   /* ===================== pratinjau tanpa server ===================== */
   var Pratinjau = {
     soal: [
-      { no: 1, tipe: 'PG', soal: 'Contoh: diketahui matriks M = {{m:3 -1; 2 4}}.\nNilai det(M) adalah ....', opsi: [{ k: 'A', t: '10' }, { k: 'B', t: '14' }, { k: 'C', t: '−14' }, { k: 'D', t: '{{f:1/2}} {{m:4 1; -2 3}}' }, { k: 'E', t: '12' }], kunci: 'B' },
-      { no: 2, tipe: 'PGK', soal: 'Contoh: diketahui {{d:2 1 0; 1 3 1; 0 1 2}} = 8.\nPilih semua pernyataan yang benar.', opsi: [{ k: 'A', t: 'Minor M₁₁ = 5' }, { k: 'B', t: 'Kofaktor C₁₂ = 2' }, { k: 'C', t: 'Kofaktor C₁₂ = −2' }, { k: 'D', t: 'Matriksnya nonsingular' }], kunci: 'ACD' },
-      { no: 3, tipe: 'BS', soal: 'Contoh: harga paket di kantin sekolah.\n| Paket | Nasi (porsi) | Es teh (gelas) | Harga (Rp)\n| P | 2 | 1 | Rp23.000\n| Q | 3 | 2 | Rp37.000\nTentukan benar atau salah setiap pernyataan.', opsi: [{ k: 'A', t: 'Sistem ini dapat ditulis {{m:2 1; 3 2}}{{m:x; y}} = {{m:23; 37}}.' }, { k: 'B', t: 'Determinan matriks koefisiennya −1.' }, { k: 'C', t: 'Harga satu porsi nasi Rp9.000.' }], kunci: 'BSB' }
+      { no: 1, tipe: 'PG', soal: 'Contoh: diketahui A = {{m:x+1 4; 3 2y}} dan B = {{m:5 3; 4 8}}.\nJika Aᵀ = B, nilai x + y adalah ....', opsi: [{ k: 'A', t: '8' }, { k: 'B', t: '9' }, { k: 'C', t: '6' }, { k: 'D', t: '−8' }, { k: 'E', t: '12' }], kunci: 'A' },
+      { no: 2, tipe: 'PG', soal: 'Contoh: diketahui matriks M = {{m:3 -1; 2 4}}.\nNilai det(M) adalah ....', opsi: [{ k: 'A', t: '10' }, { k: 'B', t: '14' }, { k: 'C', t: '−14' }, { k: 'D', t: '{{f:1/2}} {{m:4 1; -2 3}}' }, { k: 'E', t: '12' }], kunci: 'B' },
+      { no: 3, tipe: 'PGK', soal: 'Contoh: diketahui {{d:2 1 0; 1 3 1; 0 1 2}} = 8.\nPilih semua pernyataan yang benar.', opsi: [{ k: 'A', t: 'Minor M₁₁ = 5' }, { k: 'B', t: 'Kofaktor C₁₂ = 2' }, { k: 'C', t: 'Kofaktor C₁₂ = −2' }, { k: 'D', t: 'Matriksnya nonsingular' }], kunci: 'ACD' },
+      { no: 4, tipe: 'BS', soal: 'Contoh: harga paket di kantin sekolah.\n| Paket | Nasi (porsi) | Es teh (gelas) | Harga (Rp)\n| P | 2 | 1 | Rp23.000\n| Q | 3 | 2 | Rp37.000\nTentukan benar atau salah setiap pernyataan.', opsi: [{ k: 'A', t: 'Sistem ini dapat ditulis {{m:2 1; 3 2}}{{m:x; y}} = {{m:23; 37}}.' }, { k: 'B', t: 'Determinan matriks koefisiennya −1.' }, { k: 'C', t: 'Harga satu porsi nasi Rp9.000.' }], kunci: 'BSB' }
     ],
     layani: function (d) {
-      if (d.aksi === 'info') return { ok: true, judul: 'Kuis Determinan dan Invers Matriks', status: 'BUKA', mode: 'terbuka', kelas: ['XI-1', 'XI-2', 'XI-3', 'XI-4'], durasi: 60, jumlahSoal: 3 };
+      if (d.aksi === 'info') return { ok: true, judul: 'Kuis Matriks', status: 'BUKA', mode: 'terbuka', kelas: ['XI-1', 'XI-2', 'XI-3', 'XI-4'], durasi: 60, jumlahSoal: this.soal.length };
       if (d.aksi === 'masuk') return { ok: true, sesi: 'pratinjau', nama: d.nama || 'Guru', kelas: d.kelas, sisa: 3600, soal: this.soal.map(function (q) { return { no: q.no, tipe: q.tipe, soal: q.soal, opsi: q.opsi }; }), jawaban: {}, ragu: {} };
       if (d.aksi === 'simpan') return { ok: true, sisa: Math.max(0, Math.round((S.batas - Date.now()) / 1000)) };
       if (d.aksi === 'kirim') {
@@ -722,7 +723,7 @@ dialog::backdrop{background:rgba(24,33,61,.45)}
         });
         var nilai = Math.round(tot / this.soal.length * 1000) / 10, penuh = 0;
         this.soal.forEach(function (q) { var j = d.jawaban[String(q.no)]; if (q.tipe !== 'BS' && j === q.kunci) penuh++; else if (q.tipe === 'BS' && j && q.opsi.every(function (o, i) { return j[o.k] === q.kunci.charAt(i); })) penuh++; });
-        return { ok: true, selesai: true, tampil: true, nilai: nilai, penuh: penuh, jumlah: 3, kktp: 75, tuntas: nilai >= 75, perMateri: [{ materi: 'Contoh', persen: Math.round(nilai) }] };
+        return { ok: true, selesai: true, tampil: true, nilai: nilai, penuh: penuh, jumlah: this.soal.length, kktp: 75, tuntas: nilai >= 75, perMateri: [{ materi: 'Contoh', persen: Math.round(nilai) }] };
       }
       return { ok: false };
     }
